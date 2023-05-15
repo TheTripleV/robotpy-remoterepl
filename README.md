@@ -16,7 +16,7 @@ def robotInit(self):
 ## Client Side
 
 ```
-python -m remoterepl
+python -m remoterepl 10.40.96.2
 ```
 
 ### Example Interface

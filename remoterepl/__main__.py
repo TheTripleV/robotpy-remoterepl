@@ -1,30 +1,31 @@
 import time
 import socket
-from networktables import NetworkTables
+import ntcore
 # import readline # just importing this modifies behavior
-import networktables
+import uuid
+import sys
+
 
 def start():
-    local_ips = [i[4][0] for i in socket.getaddrinfo(socket.gethostname(), None)]
 
-    local_ipv4s = {i for i in local_ips if "." in i}
+    ip_address = sys.argv[1] if len(sys.argv) > 1 else None
 
-    potential_robot_ips = {
-        ".".join(i.split(".")[:-1]) + ".2" for i in local_ipv4s
-    }
+    if ip_address is None:
+        print("No IP address provided in Command Line Argument.")
+        print("Usage is 'python -m remoterepl IPADDRESS'")
+        print("Defaulting to 127.0.0.1 for simulator.")
+        ip_address = "127.0.0.1"
 
-    potential_robot_ips.add("127.0.0.1")
+    inst = ntcore.NetworkTableInstance.getDefault()
+    inst.startClient4("Remote Shell DS" + str(uuid.uuid1()))
+    inst.setServer(ip_address)
 
-    NetworkTables.startClient(list(potential_robot_ips))
-
-    while not NetworkTables.isConnected():
+    while not inst.isConnected():
         pass
 
-    server_ip = NetworkTables.getRemoteAddress()
-
     print("---------------------------")
     print("---------------------------")
-    if server_ip == '127.0.0.1':
+    if ip_address == '127.0.0.1':
         print("Connected to SIMULATOR")
     else:
         print("Connected to ROBOT")
@@ -35,7 +36,8 @@ def start():
     print("---------------------------")
     print("---------------------------")
 
-    table = NetworkTables.getTable("RemoteREPL")
+    table = inst.getTable("Remote Shell")
+    stdout_sub = table.getStringTopic("stdout")
 
     def r():
         user_input = input(">>> ")
@@ -43,14 +45,15 @@ def start():
             exit()
         user_input += f" T{time.time_ns():<20}"
         table.putString("stdin", user_input)
+        # print("sent ->", user_input)
 
-    def pr(entry, *args, **kwargs):
-        print(entry.value.getRaw()[:-22])
+    def pr(event: ntcore.Event):
+        print(event.data.value.getString()[:-22]) # type: ignore
         r()
 
-    table.getEntry("stdout").addListener(pr, networktables.NetworkTablesInstance.NotifyFlags.UPDATE)
+    inst.addListener(stdout_sub, ntcore.EventFlags.kValueAll, pr)
 
-    r()
+    # r()
 
     while True: pass
 

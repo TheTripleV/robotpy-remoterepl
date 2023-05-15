@@ -5,7 +5,7 @@ try:
     ret = subprocess.check_output("git describe --tags --abbrev=0", shell=True,)
     version = ret.decode("utf-8").strip()
 except:
-    version = "master"
+    version = "v1"
 
 with open("README.md", "r", encoding="utf-8") as readme:
     long_description = readme.read()
@@ -19,7 +19,7 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/TheTripleV/robotpy-remoterepl",
-    install_requires=["robotpy>=2022"],
+    install_requires=["robotpy>=2023"],
     packages=["remoterepl"],
     classifiers=[
         "Intended Audience :: Developers",
@@ -30,6 +30,8 @@ setuptools.setup(
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
         "Programming Language :: Python",
         "Topic :: Utilities",
     ],

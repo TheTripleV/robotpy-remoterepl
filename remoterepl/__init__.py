@@ -6,7 +6,7 @@ from contextlib import redirect_stdout, redirect_stderr
 
 # NOTE: The args for pynetworktables and _pyntcore for nt notifiers isn't the same so I got rid of it.
 
-class RemoteShell:
+class RemoteREPL:
 
 	def __init__(self, robot):
 
